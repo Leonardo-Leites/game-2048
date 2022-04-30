@@ -1,27 +1,44 @@
 # game-2048
-Jogo 2048, desenvolvido utilizando a linguagem C. Biblioteca principal ncurses (linux).
+Jogo 2048, desenvolvido utilizando a linguagem C. Biblioteca principal  `ncurses` (linux).
 
 Este jogo consiste em um tabuleiro 4×4. O objetivo do jogo é juntar pares de peças de igual valor até ser obtida a peçaa com valor
 2048.
 O jogo inicia com duas peças com valor 2, que são colocadas em posições aleatórias do tabuleiro. A cada jogada, todas as peças se movem na direção que o jogador informa (pelas teclas ←, →, ↓ e ↑) até o final da linha e uma nova peça no valor de 2 ou 4 é inserida. Caso duas peças com o mesmo valor se encontrem, os valores se somam e ela vira uma peça apenas com o valor novo da soma. O jogo acaba se não puderem ser somadas novas peças ou chegar no valor da peça 2048. 
 
 ##
-### Informações Importantes 
+### Instalando biblioteca 
 ##
-Instalação da biblioteca terminal ->
+ `Abra o terminal`
+ 
+ `Execute`
+ ```bash
 sudo apt-get install libncurses5-dev libncursesw5-dev
-
-Guia de configuração e uso da biblioteca pode ser consultado -> https://terminalroot.com.br/ncurses 
+# or
+sudo yum install ncurses-devel
+```
 ##
+### Sintaxe Import
+##
+ ```bash
+  #include <ncurses.h>
+```
+
+## 
+#### Mais informações 
+<a href="https://terminalroot.com.br/ncurses" target="_blank"><img height="30" width="90" src="https://img.shields.io/badge/-Terminal Root-blue" target="_blank"></a>
+##
+
 # Guia de compilação e inicialização 
 
+ ```bash
+  < `Criar arquivo .o` >
 cc -c game.c
-
 cc -c menu.c
-
+  < `Criar Projeto` >
 cc game.o menu.o -lncurses -o project
-
+ < `Executar Projeto` >
 ./project
+```
 
 ## 
 
