@@ -5,10 +5,22 @@ Este jogo consiste em um tabuleiro 4×4. O objetivo do jogo é juntar pares de p
 2048.
 O jogo inicia com duas peças com valor 2, que são colocadas em posições aleatórias do tabuleiro. A cada jogada, todas as peças se movem na direção que o jogador informa (pelas teclas ←, →, ↓ e ↑) até o final da linha e uma nova peça no valor de 2 ou 4 é inserida. Caso duas peças com o mesmo valor se encontrem, os valores se somam e ela vira uma peça apenas com o valor novo da soma. O jogo acaba se não puderem ser somadas novas peças ou chegar no valor da peça 2048. 
 
-INFORMAÇÕES IMPORTANTES - RUN
+##
+### Informações Importantes 
+##
+Instalação da biblioteca terminal ->
+sudo apt-get install libncurses5-dev libncursesw5-dev
+
+Guia de configuração e uso da biblioteca pode ser consultado -> https://terminalroot.com.br/ncurses 
+##
+# Guia de compilação e inicialização 
+
 cc -c game.c
+
 cc -c menu.c
+
 cc game.o menu.o -lncurses -o project
+
 ./project
 
 TELA DE MENU
