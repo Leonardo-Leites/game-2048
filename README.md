@@ -23,11 +23,13 @@ cc game.o menu.o -lncurses -o project
 
 ./project
 
+## 
+
 TELA DE MENU
 
 ![Captura de tela de 2022-04-27 13-49-25](https://user-images.githubusercontent.com/76853394/165577738-133822ae-1c72-4549-b19c-cfa985917a77.png)
 
-
+## 
 TELA DE JOGO
 
 ![Captura de tela de 2022-04-27 13-48-33](https://user-images.githubusercontent.com/76853394/165577724-1b9ba79b-f1f2-4075-97e3-ed2085033391.png)
