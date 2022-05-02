@@ -1,4 +1,6 @@
 # game-2048
+### Descrição
+##
 Jogo 2048, desenvolvido utilizando a linguagem C. Biblioteca principal  `ncurses` (linux).
 
 Este jogo consiste em um tabuleiro 4×4. O objetivo do jogo é juntar pares de peças de igual valor até ser obtida a peçaa com valor
@@ -24,7 +26,7 @@ sudo yum install ncurses-devel
 ```
 
 ## 
-#### Mais informações 
+#### Mais informações sobre sintaxe e documentação 
 <a href="https://terminalroot.com.br/ncurses" target="_blank"><img height="30" width="90" src="https://img.shields.io/badge/-Terminal Root-blue" target="_blank"></a>
 ##
 
