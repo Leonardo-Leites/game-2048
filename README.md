@@ -72,6 +72,11 @@ cc game.o menu.o -lncurses -o project
 ## 
 
 
+https://user-images.githubusercontent.com/76853394/166863143-f4267c36-e1e9-4353-9d75-5a9ceeae94e0.mp4
+
+
+
+
 
 
 
