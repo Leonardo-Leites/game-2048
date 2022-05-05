@@ -1,0 +1,4 @@
+cc -c game.c
+cc -c menu.c
+cc game.o menu.o -lncurses -o project
+./project

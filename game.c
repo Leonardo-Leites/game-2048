@@ -7,8 +7,8 @@
 
 #include "defines.h"
 
-WINDOW *gamew, *score, *movimentow, *comandosw, *rankingw, *tablew, *blocow, *savew, *load;
-void imprime_estrutura(char estrutura[][TAMANHO]){
+WINDOW *gamew, *pontuacaow, *movimentow, *comandosw, *rankingw, *tablew, *blocow, *savew, *load, *win; // criação das janelas utilizadas na imprementação da interface
+void imprime_estrutura(char estrutura[][TAMANHO]){ // função meramente auxiliar de visualização da estrutura do tabuleiro
 	for(int i =0; i<TAMANHO; i++){
 		for (int k=0; k<TAMANHO; k++){
 			printf("%d", *(estrutura[0]+i *TAMANHO +k));
@@ -16,7 +16,7 @@ void imprime_estrutura(char estrutura[][TAMANHO]){
 		printf("\n");
 	}
 }
-int save(char estrutura[][TAMANHO], int score){
+int save(char estrutura[][TAMANHO], int score){ //  salvar os dados do jogo, como a estrutura (posição das peças no tabuleiro) e o score
 
 	keypad(savew, TRUE);
 	curs_set(1);
@@ -34,7 +34,7 @@ int save(char estrutura[][TAMANHO], int score){
 	fseek(arq, 0,SEEK_END);
 
 
-    savew = newwin(5, 50, (yMax/2), (xMax/4));
+    savew = newwin(5, 50, (yMax/2), (xMax/3));
 	wattrset(savew, COLOR_PAIR(6));
 	box(savew, ACS_VLINE, ACS_HLINE);
 	wrefresh(savew);
@@ -42,15 +42,18 @@ int save(char estrutura[][TAMANHO], int score){
 	mvwprintw(savew, 1, 1,"%50s"," ");
 	mvwprintw(savew, 1, 22,"Save-Game");
 	mvwprintw(savew, 2, 1,"%49s"," ");
-	mvwprintw(savew, 3, 1,"%49s"," ");
+	mvwprintw(savew, 3, 1, "%49s", " ");
 	wattrset(savew, COLOR_PAIR(2));
-	mvwprintw(savew, 3, 1,"Por favor informe seu nick-name: ");
-
+	mvwprintw(savew, 3, 1,"Por favor informe seu nickname: ");
+	wrefresh(savew);
 	do {
 		letra = wgetch(savew);
 		name[cont] = letra;
 		
-		if(name[cont] >= 'a' && name[cont] <= 'z' || letra == 127){
+		if(name[cont] >= 'a' && name[cont] <= 'z' || letra == 127 || letra == 27){
+			if(letra == 27){
+				return 0;
+			}
 			if(cont != 0){
 				if(letra == 127){
 					name[cont-1] = ' ';
@@ -64,7 +67,8 @@ int save(char estrutura[][TAMANHO], int score){
 		}else if(letra == 10){
 			name[cont] = '\0';
 		}
-		mvwprintw(savew, 3, 1 + strlen("Por favor informe seu nick-name: "),"%s", name);	
+		
+		mvwprintw(savew, 3, 1 + strlen("Por favor informe seu nickname: "),"%s", name);	
 	}while(letra != 10 && cont < 10);
 	
 	wattroff(savew, COLOR_PAIR(2));
@@ -77,10 +81,9 @@ int save(char estrutura[][TAMANHO], int score){
 	for(int i =0; i<4; i++){
 		for (int j =0; j<4; j++){
 			sprintf(estr, "%d", *(estrutura [0]+i *TAMANHO +j));
-			fprintf(arq, "*%s", estr);
+			fprintf(arq, "%s#", estr);
 		}
 	}
-	fprintf(arq, "%s", "*");
 	fclose(arq);
 
 	keypad(savew, FALSE);
@@ -95,9 +98,10 @@ int save(char estrutura[][TAMANHO], int score){
 	usleep(SLEEP*200);
 	wclear(savew);
 	wrefresh(savew);
+	delwin(gamew);
 	
 }
-void init_colors() {
+void init_colors() {  // iniciando alguns padrões de cores para usar 
 	start_color();
 	init_color(COLOR_BLACK, 60,60,60);
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -111,7 +115,7 @@ void init_colors() {
 	init_pair(9, COLOR_BLACK, COLOR_BLACK);
 
 }
-void scorew(int pontos){
+void scorew(int pontos){ // printar os dados de score do jogo 
 
 	int xMax, yMax;
 	char point[sizeof(int)];
@@ -119,17 +123,17 @@ void scorew(int pontos){
 
 	sprintf(point, "%d", pontos);   
 
-	score = newwin(4, 10, (yMax-30), (xMax-60));
-	wattrset(score, COLOR_PAIR(6));
-	mvwprintw(score, 1, 1, "  score  ");
-	wattroff(score, COLOR_PAIR(6));
-	wattrset(score, COLOR_PAIR(2));
-	mvwprintw(score, 2, 1, "         ");
-	mvwprintw(score, 2, 5, "%s",point);
-	wattroff(score, COLOR_PAIR(2));
-	wrefresh(score);
+	pontuacaow = newwin(4, 10, (yMax-30), (xMax-60));
+	wattrset(pontuacaow, COLOR_PAIR(6));
+	mvwprintw(pontuacaow, 1, 1, "  score  ");
+	wattroff(pontuacaow, COLOR_PAIR(6));
+	wattrset(pontuacaow, COLOR_PAIR(2));
+	mvwprintw(pontuacaow, 2, 1, "         ");
+	mvwprintw(pontuacaow, 2, 5, "%s",point);
+	wattroff(pontuacaow, COLOR_PAIR(2));
+	wrefresh(pontuacaow);
 }
-void movimentosw(int mov){
+void movimentos(int mov){ // printar os dados de movimentos do jogo
 
 	int xMax, yMax;
 	char point[sizeof(int)];
@@ -147,7 +151,7 @@ void movimentosw(int mov){
 	wattroff(movimentow, COLOR_PAIR(2));
 	wrefresh(movimentow);
 }
-void comands(){
+void comands(){ // printar os comandos possíveis no jogo
 
 	int xMax, yMax;
     getmaxyx(stdscr, yMax, xMax);
@@ -159,7 +163,7 @@ void comands(){
 	mvwprintw(comandosw, 4, 1, "Setas - Jogar");
 	wrefresh(comandosw);
 }
-void qtdLinhas(int *qtdLinhas){
+void qtdLinhas(int *qtdLinhas){ // verifica a quantidade de linhas do arquivo save.txt
 
 int caractere, existe_linhas = 0;
 int quant_linhas = 0;
@@ -178,7 +182,7 @@ if(existe_linhas){
 }
 *qtdLinhas = quant_linhas;
 }
-void rank(){
+void rank(){ // printando o rank de jogadores na tela (ainda não ordenado)
 
 	FILE *arq = fopen(FILE_NAME, "r");
 	if(arq == NULL){
@@ -201,13 +205,9 @@ void rank(){
 	wattroff(rankingw, COLOR_PAIR(6));
 	wattrset(rankingw, COLOR_PAIR(2));
 
-	for (int i =1; i <= tamArq && i <= 5; i++){
-		//fscanf(arq, "%d", &pontuacao);
-		//sprintf(pontos, "%d", pontuacao);
-		//fscanf(arq, "%s", name);
+	for (int i =1; i <= tamArq && i < 5; i++){
 
 		fgets(linha, 52, arq);
-		//printf("%s", linha);
 		char *p = strtok(linha, "#");
 		int aux = 0;
 
@@ -231,7 +231,7 @@ void rank(){
 	wrefresh(rankingw);
 
 }
-int colorponto(int ponto){
+int colorponto(int ponto){ // retorna a cor ao bloco dependendo do seu valor
 
 	if(ponto == 2)
 		return 3;
@@ -246,7 +246,7 @@ int colorponto(int ponto){
 	if(ponto == 1024 || ponto == 16)
 		return 8;
 }
-int returnXY(int j, int i, int *x, int *y){
+int returnXY(int j, int i, int *x, int *y){ // retorna a posição y e x do bloco, pelo i e j passados
 
 	if (i == 0){
 		*y = 5;
@@ -268,7 +268,7 @@ int returnXY(int j, int i, int *x, int *y){
 		*x = 52;
 	}
 }
-int returnIJ(int y, int x, int *i, int *j){
+int returnIJ(int y, int x, int *i, int *j){ // retorna a posição i e j, pelo x e y passados
 
 	if(y <=5 && y >= 0){
 		*i = 0;
@@ -291,9 +291,9 @@ int returnIJ(int y, int x, int *i, int *j){
 	}
 	return (*i,*j);
 }
-void desenha_bloco(char estrutura [][TAMANHO]){
+void desenha_bloco(char estrutura [][TAMANHO]){ // responsavel por desenhar os blocos nas posições da "estrutura"
 
-	char point[sizeof(int)];
+	char point[sizeof(int)*2];
 	int y, x,  width = 11, height = 6, num;
 
 		for(int i = 0; i<4; i++){
@@ -305,10 +305,10 @@ void desenha_bloco(char estrutura [][TAMANHO]){
 
 					blocow = newwin(height, width, y,x);
 					wattrset(blocow, COLOR_PAIR(num));
-					sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)); 
+					sprintf(point, "%d ", *(estrutura[0]+i *TAMANHO +j)); 
 					mvwprintw(blocow, 0, 0, "               ");
 					mvwprintw(blocow, 1, 1, "               ");
-					mvwprintw(blocow, 2, 1, "   %s          ",point);
+					mvwprintw(blocow, 2, 1, "   %s         ",point);
 					mvwprintw(blocow, 3, 1, "               ");
 					mvwprintw(blocow, 4, 1, "               ");
 					mvwprintw(blocow, 5, 1, "               ");
@@ -319,7 +319,7 @@ void desenha_bloco(char estrutura [][TAMANHO]){
 		}
 
 }
-void desenha_tabela(WINDOW *tablew){
+void desenha_tabela(WINDOW *tablew){ // responsavel por desenhar a tabela de jogo
 
 	for(int k = 0; k < 48; k+=12){
         for (int i = 0; i <= 28; i+=7){
@@ -338,7 +338,7 @@ void desenha_tabela(WINDOW *tablew){
     }
 	wrefresh(tablew);
 }
-void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, int org){
+void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, int org){ // anima os blocos, dependendo das peças do tabuleiro e escolha de movimento do usuário
 	
 	int y, x,  width = 11, height = 6, num, oldy, oldx;
 	char point[sizeof(int)];
@@ -350,11 +350,9 @@ void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, i
 
 			blocow = newwin(height, width, oldy, x);
 			wrefresh(blocow);
-			desenha_tabela(tablew);
-
+	
 			blocow = newwin(height, width, ++oldy, x);
 			wrefresh(blocow);
-
 			usleep(SLEEP);
 		}
 	}else if(org == 2){
@@ -362,11 +360,9 @@ void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, i
 
 			blocow = newwin(height, width, oldy, x);
 			wrefresh(blocow);
-			desenha_tabela(tablew);
 
 			blocow = newwin(height, width, --oldy, x);
 			wrefresh(blocow);
-
 			usleep(SLEEP);
 		}
 	}else if(org == 3){
@@ -374,11 +370,9 @@ void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, i
 
 			blocow = newwin(height, width, y, oldx);
 			wrefresh(blocow);
-			desenha_tabela(tablew);
 
 			blocow = newwin(height, width, y, --oldx);
 			wrefresh(blocow);
-
 			usleep(SLEEP);
 		}
 	}
@@ -387,20 +381,38 @@ void anima_bloco(char estrutura [][TAMANHO], int i, int j, int oldi, int oldj, i
 
 			blocow = newwin(height, width, y, oldx);
 			wrefresh(blocow);
-			desenha_tabela(tablew);
 
 			blocow = newwin(height, width, y, ++oldx);
 			wrefresh(blocow);
-
 			usleep(SLEEP);
 		}
 	}
 		desenha_tabela(tablew);
 		desenha_bloco(estrutura);
 }
-void colide(char estrutura [][TAMANHO], int value, int *score){
+void ganhou(char estrutura[][TAMANHO], int score){ // caso chegue em 2048, ganhou
+
+	int xMax, yMax;
+    getmaxyx(stdscr, yMax, xMax);
+
+
+    win = newwin(5, 50, (yMax/2), (xMax/3));
+	wattrset(win, COLOR_PAIR(6));
+	box(win, ACS_VLINE, ACS_HLINE);
+	wrefresh(win);
+
+	mvwprintw(win, 1, 1,"%50s"," ");
+	mvwprintw(win, 2, 1,"%49s"," ");
+	mvwprintw(win, 2, 10,"Parabens, voce completou 2048!");
+	mvwprintw(win, 3, 1,"%49s"," ");
+	wattroff(win, COLOR_PAIR(6));
+	wrefresh(win);
+	usleep(SLEEP*300);
+
+	save(estrutura, score);
+}
+int colide(char estrutura [][TAMANHO], int value, int *score){ // realiza a verificação de colisão de blocos com mesmo valor, bem como soma de score e peças
 	
-	char point[sizeof(int)];
 	int num, org, aux;
 
 	switch (value){
@@ -409,84 +421,27 @@ void colide(char estrutura [][TAMANHO], int value, int *score){
 		for(int i = 0; i<4; i++){
 			for(int j = 0; j<4; j++){
 				if(*(estrutura[0]+i *TAMANHO +j) != 0){
-					switch (i){
-					case 0:
-						if(*(estrutura [0]+1 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+1 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+1 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+1 *TAMANHO +j);
-								anima_bloco(estrutura, 1,j, 0, j,org); 
+					for(int k = i; k <=3; k++){
+						if(k+1 <= 3){
+							if(*(estrutura [0]+(k+1) *TAMANHO +j) != 0){
+								if(*(estrutura [0]+(k+1) *TAMANHO +j) == *(estrutura [0]+k *TAMANHO +j)){
+									num = colorponto(*(estrutura[0]+k *TAMANHO +j)*2);
+									*(estrutura [0]+(k+1) *TAMANHO +j) = *(estrutura[0]+k *TAMANHO +j)*2;
+									*score += *(estrutura [0]+k *TAMANHO +j);
+									*(estrutura [0]+k *TAMANHO +j) = 0;
+									anima_bloco(estrutura, (k+1),j, k, j,org); 
+									if(*(estrutura [0]+(k+1) *TAMANHO +j) == 4){
+										int a = *score;
+										ganhou(estrutura, a);
+										return 0;
+									}
+								}
+							}else{
+								*(estrutura [0]+(k+1) *TAMANHO +j) = *(estrutura[0]+k *TAMANHO +j);
+								*(estrutura [0]+k *TAMANHO +j) = 0;
+								anima_bloco(estrutura, (k+1),j, k, j,org); 
 							}
-						}else if(*(estrutura [0]+2 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+2 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+2 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+2 *TAMANHO +j);
-								anima_bloco(estrutura, 2,j, 0, j,org);  
-							}
-						}else if(*(estrutura [0]+3 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+3 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+3 *TAMANHO +j);
-								anima_bloco(estrutura, 3,j, 0, j,org); 
-							}
-						}else{
-							*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j);
-							*(estrutura [0]+i *TAMANHO +j) = 0;
-							anima_bloco(estrutura, 3,j, 0, j,org);
 						}
-						break;
-					case 1:
-						if(*(estrutura [0]+2 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+2 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+2 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+2 *TAMANHO +j);
-								anima_bloco(estrutura, 2,j, 1, j,org); 
-							}
-						}else if(*(estrutura [0]+3 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+3 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+3 *TAMANHO +j);
-								anima_bloco(estrutura, 3,j, 1, j,org); 
-							}
-						}else {
-							*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j);
-							*(estrutura [0]+i *TAMANHO +j) = 0;
-							anima_bloco(estrutura, 3,j, 1, j,org); 
-						}
-						break;
-					case 2:
-						if(*(estrutura [0]+3 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+3 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+3 *TAMANHO +j);
-								anima_bloco(estrutura, 3,j, 2, j,org); 
-							}
-						}else{
-							*(estrutura [0]+3 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j);
-							*(estrutura [0]+i *TAMANHO +j) = 0;
-							anima_bloco(estrutura, 3,j, 2, j,org); 
-						}
-						break;
-					default:
-						break;
 					}
 				}
 			}
@@ -497,72 +452,27 @@ void colide(char estrutura [][TAMANHO], int value, int *score){
 		for(int i = 0; i<4; i++){
 			for(int j = 0; j<4; j++){
 				if(*(estrutura[0]+i *TAMANHO +j) != 0){
-					switch (i){
-					case 1:
-						if(*(estrutura [0]+0 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+0 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+0 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+0 *TAMANHO +j);
-								anima_bloco(estrutura, 0,j, 1, j,org); 
+					for(int k = i; k >=0; k--){
+						if(k-1 >= 0){
+							if(*(estrutura [0]+(k-1) *TAMANHO +j) != 0){
+								if(*(estrutura [0]+(k-1) *TAMANHO +j) == *(estrutura [0]+k *TAMANHO +j)){
+									num = colorponto(*(estrutura[0]+k *TAMANHO +j)*2);
+									*(estrutura [0]+(k-1) *TAMANHO +j) = *(estrutura[0]+k *TAMANHO +j)*2;
+									*score += *(estrutura [0]+k *TAMANHO +j);
+									*(estrutura [0]+k *TAMANHO +j) = 0;
+									anima_bloco(estrutura, (k-1),j, k, j,org); 
+									if(*(estrutura [0]+(k+1) *TAMANHO +j) == 64){
+										int a = *score;
+										ganhou(estrutura, a);
+										return 0;
+									}
+								}
+							}else{
+								*(estrutura [0]+(k-1) *TAMANHO +j) = *(estrutura[0]+k *TAMANHO +j);
+								*(estrutura [0]+k *TAMANHO +j) = 0;
+								anima_bloco(estrutura, (k-1),j, k, j,org); 
 							}
 						}
-						break;
-					case 2:
-						if(*(estrutura [0]+1 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+1 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+1 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+1 *TAMANHO +j);
-								anima_bloco(estrutura, 1,j, 2, j,org); 
-							}
-						}else if(*(estrutura [0]+0 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+0 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+0 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+0 *TAMANHO +j);
-								anima_bloco(estrutura, 0,j, 2, j,org); 
-							}
-						}
-						break;
-					case 3:
-						if(*(estrutura [0]+2 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+2 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+2 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+2 *TAMANHO +j);
-								anima_bloco(estrutura, 2,j, 3, j,org); 
-							}
-						}else if(*(estrutura [0]+1 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+1 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+1 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+1 *TAMANHO +j);
-								anima_bloco(estrutura, 1,j, 3, j,org);  
-							}
-						}else if(*(estrutura [0]+0 *TAMANHO +j) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+0 *TAMANHO +j)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+0 *TAMANHO +j) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+3 *TAMANHO +j);
-								anima_bloco(estrutura, 0,j, 3, j,org); 
-							}
-						}
-						break;
-					default:
-						break;
 					}
 				}
 			}
@@ -573,72 +483,27 @@ void colide(char estrutura [][TAMANHO], int value, int *score){
 		for(int i = 0; i<4; i++){
 			for(int j = 0; j<4; j++){
 				if(*(estrutura[0]+i *TAMANHO +j) != 0){
-					switch (j){
-					case 1:
-						if(*(estrutura [0]+i *TAMANHO +0) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +0)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +0) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +0);
-								anima_bloco(estrutura, i,0, i, 1,org); 
+					for(int k = j; k >=0; k--){
+						if(k-1 >= 0){
+							if(*(estrutura [0]+i *TAMANHO +(k-1)) != 0){
+								if(*(estrutura [0]+i *TAMANHO +(k-1)) == *(estrutura [0]+i *TAMANHO +k)){
+									num = colorponto(*(estrutura[0]+i *TAMANHO +k)*2);
+									*(estrutura [0]+i *TAMANHO +(k-1)) = *(estrutura[0]+i *TAMANHO +k)*2;
+									*score += *(estrutura [0]+i *TAMANHO +k);
+									*(estrutura [0]+i *TAMANHO +k) = 0;
+									anima_bloco(estrutura, i,(k-1), i, k,org); 
+									if(*(estrutura [0]+(k+1) *TAMANHO +j) == 64){
+										int a = *score;
+										ganhou(estrutura, a);
+										return 0;
+									}
+								}
+							}else{
+								*(estrutura [0]+i *TAMANHO +(k-1)) = *(estrutura[0]+i *TAMANHO +k);
+								*(estrutura [0]+i *TAMANHO +k) = 0;
+								anima_bloco(estrutura, i,(k-1), i, k,org); 
 							}
 						}
-						break;
-					case 2:
-						if(*(estrutura [0]+i *TAMANHO +1) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +1)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +1) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +1);
-								anima_bloco(estrutura, i,1, i, 2,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +0) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +0)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +0) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +0);
-								anima_bloco(estrutura, i,0, i, 2,org); 
-							}
-						}
-						break;
-					case 3:
-						if(*(estrutura [0]+i *TAMANHO +2) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +2)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +2) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +2);
-								anima_bloco(estrutura, i,2, i, 3,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +1) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +1)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +1) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +1);
-								anima_bloco(estrutura, i,1, i, 3,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +0) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +0)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +0) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +0);
-								anima_bloco(estrutura, i,0, i, 3,org); 
-							}
-						}
-						break;
-					default:
-						break;
 					}
 				}
 			}
@@ -649,72 +514,27 @@ void colide(char estrutura [][TAMANHO], int value, int *score){
 		for(int i = 0; i<4; i++){
 			for(int j = 0; j<4; j++){
 				if(*(estrutura[0]+i *TAMANHO +j) != 0){
-					switch (j){
-					case 0:
-						if(*(estrutura [0]+i *TAMANHO +1) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +1)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +1) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +1);
-								anima_bloco(estrutura, i,1, i, 0,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +2) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +2)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +2) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +2);
-								anima_bloco(estrutura, i,2, i, 0,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +3) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +3)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +3) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +3);
-								anima_bloco(estrutura, i,3, i, 0,org); 
+					for(int k = j; k <=3; k++){
+						if(k+1 <= 3){
+							if(*(estrutura [0]+i *TAMANHO +(k+1)) != 0){
+								if(*(estrutura [0]+i *TAMANHO +(k+1)) == *(estrutura [0]+i *TAMANHO +k)){
+									num = colorponto(*(estrutura[0]+i *TAMANHO +k)*2);
+									*(estrutura [0]+i *TAMANHO +(k+1)) = *(estrutura[0]+i *TAMANHO +k)*2;
+									*score += *(estrutura [0]+i *TAMANHO +k);
+									*(estrutura [0]+i *TAMANHO +k) = 0;
+									anima_bloco(estrutura, i,(k+1), i, k,org); 
+									if(*(estrutura [0]+(k+1) *TAMANHO +j) == 64){
+										int a = *score;
+										ganhou(estrutura, a);
+										return 0;
+									}
+								}
+							}else{
+								*(estrutura [0]+i *TAMANHO +(k+1)) = *(estrutura[0]+i *TAMANHO +k);
+								*(estrutura [0]+i *TAMANHO +k) = 0;
+								anima_bloco(estrutura, i,(k+1), i, k,org); 
 							}
 						}
-						break;
-					case 1:
-						if(*(estrutura [0]+i *TAMANHO +2) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +2)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +2) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +2);
-								anima_bloco(estrutura, i,2, i, 1,org); 
-							}
-						}else if(*(estrutura [0]+i *TAMANHO +3) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +3)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +3) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +3);
-								anima_bloco(estrutura, i,3, i, 1,org); 
-							}
-						}
-						break;
-					case 2:
-						if(*(estrutura [0]+i *TAMANHO +3) != 0){
-							if(*(estrutura [0]+i *TAMANHO +j) == *(estrutura [0]+i *TAMANHO +3)){
-								sprintf(point, "%d", *(estrutura[0]+i *TAMANHO +j)*2);
-								num = colorponto(*(estrutura[0]+i *TAMANHO +j)*2);
-								*(estrutura [0]+i *TAMANHO +3) = *(estrutura[0]+i *TAMANHO +j)*2;
-								*(estrutura [0]+i *TAMANHO +j) = 0;
-								*score += *(estrutura [0]+i *TAMANHO +3);
-								anima_bloco(estrutura, i,3, i, 2,org); 
-							}
-						}
-						break;
-					default:
-						break;
 					}
 				}
 			}
@@ -726,7 +546,7 @@ void colide(char estrutura [][TAMANHO], int value, int *score){
 	}
 	
 }
-void bloco(char estrutura[][TAMANHO]){
+void bloco(char estrutura[][TAMANHO]){ // gera blocos aleatórios no tabuleiro
 
 
 	int ponto, sair = 0, choice;
@@ -768,9 +588,9 @@ void bloco(char estrutura[][TAMANHO]){
  desenha_bloco(estrutura);
 	
 }
-int tabela(char estrutura[][TAMANHO], int score){
+int controle(char estrutura[][TAMANHO], int score){ // controle de movimentação e movimentos
 	
-	int choice, movimentos = 0;
+	int choice, mov = 0;
 
 	tablew = newwin(29, 49, 4, 15);
 	box(tablew, '|', '-'); 
@@ -779,8 +599,7 @@ int tabela(char estrutura[][TAMANHO], int score){
 
 	desenha_tabela(tablew);
 	wrefresh(tablew);
-	bloco(estrutura);
-	bloco(estrutura);
+	desenha_bloco(estrutura);
 
 	while(1){
 	//imprime_estrutura(estrutura);
@@ -788,36 +607,56 @@ int tabela(char estrutura[][TAMANHO], int score){
 	switch (choice)
 	{
 	case KEY_DOWN:
-		colide(estrutura, 1, &score);
+		int a = colide(estrutura, 1, &score);
+		if(a == 0){
+		delwin(gamew);
+		endwin();
+		return 0;
+		}
 		usleep(SLEEP*2);
 		bloco(estrutura);
 		scorew(score);
-		movimentos++;
-		movimentosw(movimentos);
+		mov++;
+		movimentos(mov);
 		break;
 	case KEY_UP:
-		colide(estrutura, 2, &score);
+		int a = colide(estrutura, 2, &score);
+		if(a == 0){
+		delwin(gamew);
+		endwin();
+		return 0;
+		}
 		usleep(SLEEP*2);
 		bloco(estrutura);
 		scorew(score);
-		movimentos++;
-		movimentosw(movimentos);
+		mov++;
+		movimentos(mov);
 		break;
 	case KEY_LEFT:
-		colide(estrutura, 3, &score);
+		int a = colide(estrutura, 3, &score);
+		if(a == 0){
+		delwin(gamew);
+		endwin();
+		return 0;
+		}
 		usleep(SLEEP*2);
 		bloco(estrutura);
 		scorew(score);
-		movimentos++;
-		movimentosw(movimentos);
+		mov++;
+		movimentos(mov);
 		break;
 	case KEY_RIGHT:
-		colide(estrutura, 4, &score);
+		int a = colide(estrutura, 4, &score);
+		if(a == 0){
+		delwin(gamew);
+		endwin();
+		return 0;
+		}
 		usleep(SLEEP*2);
 		bloco(estrutura);
 		scorew(score);
-		movimentos++;
-		movimentosw(movimentos);
+		mov++;
+		movimentos(mov);
 		break;
 	case 27:
 		printf("esc");
@@ -826,7 +665,21 @@ int tabela(char estrutura[][TAMANHO], int score){
 		return 0;
 		break;
 	case 110:
-		printf("n");
+		// wclear(gamew);
+		// wclear(tablew);
+		// score = 0;
+		// mov = 0;
+		// scorew(score);
+		// movimentos(mov);
+		// char estrutura[TAMANHO][TAMANHO] = {{0,0,0,0},
+		// 				{0,0,0,0},
+		// 				{0,0,0,0},
+		// 				{0,0,0,0}};
+		// wrefresh(gamew);
+		// wrefresh(movimentow);
+		// wrefresh(pontuacaow);
+		// wrefresh(tablew);
+		// controle(estrutura, score);
 		break;
 	case 115:
 		save(estrutura, score);
@@ -839,21 +692,20 @@ int tabela(char estrutura[][TAMANHO], int score){
 	}
 	}
 }
-void play(char estrutura[][TAMANHO], int score){
+void play(char estrutura[][TAMANHO], int score){ // chama as funções de score, movimentos, rank, comandos e controle. Passando seus parametros quando necessario
 
-    int xMax, yMax, movimentos = 0;
+    int xMax, yMax, mov = 0;
     getmaxyx(stdscr, yMax, xMax);
 
 		scorew(score);
-		movimentosw(movimentos);
+		movimentos(mov);
 		rank();
 		comands();
-		tabela(estrutura, score);
+		controle(estrutura, score);
 }
-int load_game(){
+int load_game(char estrutura[][TAMANHO]){ // caso opão na tela de menu, carrega um jogo já salvo ou informa que não foi encontrado e fecha o jogo
 
 	keypad(load, TRUE);
-	curs_set(1);
 
 	FILE *arq = fopen(FILE_NAME, "r");
 	if(arq == NULL){
@@ -862,14 +714,15 @@ int load_game(){
 		return 0;
     }
 
-    int xMax, yMax, letra, cont = 0, tamArq;
-	char name[NAME_TAM], estrutura[TAMANHO][TAMANHO], pontuacao[sizeof(int)];
+    int xMax, yMax, letra, cont = 0, tamArq, score;
+	getmaxyx(stdscr, yMax, xMax); 
+
+	char name[NAME_TAM], pontos[sizeof(int)*2];
 	char pesqname[NAME_TAM];
-    getmaxyx(stdscr, yMax, xMax); 
 	char linha[52];
 	qtdLinhas(&tamArq);
 
-    load = newwin(5, 50, (yMax/2), (xMax/4));
+    load = newwin(5, 50, (yMax/2), (xMax/3));
 	wattrset(load, COLOR_PAIR(6));
 	box(load, ACS_VLINE, ACS_HLINE);
 	wrefresh(load);
@@ -879,16 +732,16 @@ int load_game(){
 	mvwprintw(load, 2, 1,"%49s"," ");
 	mvwprintw(load, 3, 1,"%49s"," ");
 	wattrset(load, COLOR_PAIR(2));
-	mvwprintw(load, 3, 1,"Por favor informe seu nick-name: ");
+	mvwprintw(load, 3, 1,"Por favor informe seu nickname: ");
 	
 	do {
 		letra = wgetch(load);
-		name[cont] = letra;
+		pesqname[cont] = letra;
 		
-		if(name[cont] >= 'a' && name[cont] <= 'z' || letra == 127){
+		if(pesqname[cont] >= 'a' && pesqname[cont] <= 'z' || letra == 127){
 			if(cont != 0){
 				if(letra == 127){
-					name[cont-1] = ' ';
+					pesqname[cont-1] = ' ';
 					cont --;
 				}else{
 					cont ++;
@@ -897,56 +750,77 @@ int load_game(){
 				cont ++;
 			}
 		}else if(letra == 10){
-			name[cont] = '\0';
+			pesqname[cont] = '\0';
 		}
-		mvwprintw(savew, 3, 1 + strlen("Por favor informe seu nick-name: "),"%s", name);	
+		mvwprintw(load, 3, 1 + strlen("Por favor informe seu nickname: "),"%s", pesqname);	
+
 	}while(letra != 10 && cont < 10);
 
+	char copy[10];
+	strcpy(copy, pesqname);
+
+	wrefresh(load);
 	wattroff(load, COLOR_PAIR(2));
 	wattroff(load, COLOR_PAIR(6));
 
-	for (int i =0; i < tamArq; i++){
+	rewind(arq);
 
+	for (int i =1; i <= tamArq; i++){
+	
 	fgets(linha, 52, arq);
 
-	char *infos = strtok(linha, "#");
-	char *estr = strtok(linha, "*");
+	char *p = strtok(linha, "#");
 	int aux = 0, i = 0, j = 0;
 
-	do{
-		if(aux == 0){
-			sprintf(pontuacao, "%s", infos);
-		}else if(aux == 1){
-			sprintf(pesqname, "%s", infos);
-		}else{
-			do{	
-				//sprintf(estrutura[i][j], "%s", estr);
-				i++;
-				j++;
-			}while((estr = strtok(NULL, "*")) || i == 4);
-		}
-		aux++;
-	}while((infos = strtok(NULL, "#")));
-		if(pesqname == name){
+		do{
+			if(aux == 0){
+				sprintf(pontos, "%s", p);
+			}else if(aux == 1){
+				sprintf(name, "%s", p);
+			}else{
+				if(j < 4){
+					*(estrutura[0]+i *TAMANHO +j) = atoi(p);
+					j+=1;
+				}else{
+					i +=1;
+					j = 0;
+				}
+
+			}
+			aux++;
+		}while((p = strtok(NULL, "#")));
+
+		if(strcmp(name, copy) == 0){
+			score = atoi(pontos);
 			break;
-		}
+	 	}
 	}
+	if(strcmp(name,copy) != 0){
+				wattrset(load, COLOR_PAIR(2));
+				mvwprintw(load, 3, 1,"%49s"," ");
+				mvwprintw(load, 3, 18,"Name não encontrado");
+				wattrset(load, COLOR_PAIR(2));
+				wrefresh(load);
+				usleep(SLEEP*200);
+				delwin(load);
+				delwin(gamew);
+				endwin();
+				return 0;
+	}
+
 	fclose(arq);
-	int score;
-	score = atoi(pontuacao);
 	keypad(load, false);
-	curs_set(0);
 	wclear(load);
 	wrefresh(load);
 	play(estrutura, score);
 }
-int main() {
+int main() { // com as informações do menu seleciona o comando, gera a estrutura primária, bem como as duas peças aleatórias de valor 2 
 
 	char estrutura[TAMANHO][TAMANHO] = {{0,0,0,0},
 						{0,0,0,0},
 						{0,0,0,0},
 						{0,0,0,0}};
-	int  pontos = 0;
+	int  pontos = 0, y,x,i,j, sair = 0;;
 
 	initscr();
 	noecho(); // disable echoing of characters on the screen
@@ -966,10 +840,31 @@ int main() {
 			return 0;
         }
 		if(play_game == 1){
-			load_game();
-		}
-		play(estrutura, pontos);
+			load_game(estrutura);
+			return 0;
+		}else if(play_game == 0){
+			srand(time(NULL));
+				for (int k = 0; k<2; k++){
+					
+					y = rand() % 26;
+					x = rand() % 52;
+					while(sair == 0){
 
+						returnIJ(y,x, &i, &j);
+
+						if(*(estrutura[0]+i *TAMANHO +j) != 0){
+							y = rand() % 26;
+							x = rand() % 52;
+						}else{
+							*(estrutura[0]+i *TAMANHO +j) = 2;
+							sair = 1;
+						}
+
+					}
+					sair =0;
+				}
+			play(estrutura, pontos);
+		}
 		delwin(gamew);
 		endwin();
 		return 0;

@@ -12,4 +12,6 @@ int colorponto(int ponto);
 int returnXY(int p1, int p2, int *x, int *y);
 int returnIJ(int p1, int p2, int *i, int *j);
 int save(char estrutura[][TAMANHO], int score);
-int load_game();
+int load_game(char estrutura[][TAMANHO]);
+int ganhou(char estrutura[][TAMANHO], int score);
+int colide(char estrutura [][TAMANHO], int value, int *score);
