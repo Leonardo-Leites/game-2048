@@ -44,17 +44,21 @@ cc game.o menu.o -lncurses -o project
 
 ## 
 ### Telas de jogo
+
 `Inicio
 `
+
 ![Captura de tela de![Captura de tela de 2022-05-03 22-02-03](https://user-images.githubusercontent.com/76853394/166861009-a1103792-4af5-4b57-afd2-c3188456e6e4.png)
  2022-04-27 13-49-25](https://user-images.githubusercontent.com/76853394/165577738-133822ae-1c72-4549-b19c-cfa985917a77.png)
  
  `Carregar Jogo salvo
  `
+ 
 ![Captura de tela de 2022-05-03 22-00-33](https://user-images.githubusercontent.com/76853394/166860970-2cab60ef-0ad7-4b9f-9569-dc57cb4f6ea2.png)
 
 `Tela de jogo
 `
+
 ![Captura de tela de 2022-05-03 22-02-03](https://user-images.githubusercontent.com/76853394/166861282-7a37f7f5-70bb-44ab-9931-a1dd64d9885f.png)
 
 `Salvar um Jogo
